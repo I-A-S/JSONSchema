@@ -1,0 +1,153 @@
+{
+    "$schema": "http://json-schema.org/draft-07/schema#",
+    "title": "IAGHI Pipeline Definition",
+    "type": "object",
+    "required": [
+        "name",
+        "shaderSource",
+        "vertexShaderEntry",
+        "fragmentShaderEntry",
+        "attachments",
+        "primitiveType"
+    ],
+    "additionalProperties": false,
+    "properties": {
+        "name": {
+            "type": "string",
+            "description": "Unique name for the pipeline."
+        },
+        "shaderSource": {
+            "type": "string",
+            "description": "Path to the .slang source file."
+        },
+        "vertexShaderEntry": {
+            "type": "string",
+            "default": "vertexMain"
+        },
+        "fragmentShaderEntry": {
+            "type": "string",
+            "default": "fragmentMain"
+        },
+        "bindings": {
+            "type": "array",
+            "items": {
+                "type": "object",
+                "required": [
+                    "binding",
+                    "type",
+                    "visibility"
+                ],
+                "properties": {
+                    "binding": {
+                        "type": [
+                            "string",
+                            "integer"
+                        ],
+                        "pattern": "^[0-9]+$",
+                        "description": "Binding index (UINT32)"
+                    },
+                    "count": {
+                        "type": [
+                            "string",
+                            "integer"
+                        ],
+                        "pattern": "^[0-9]+$",
+                        "default": 1,
+                        "description": "Array count (UINT32)"
+                    },
+                    "type": {
+                        "type": "string",
+                        "enum": [
+                            "UNIFORM_BUFFER",
+                            "STORAGE_BUFFER",
+                            "SAMPLED_IMAGE",
+                            "STORAGE_IMAGE"
+                        ]
+                    },
+                    "visibility": {
+                        "type": "string",
+                        "enum": [
+                            "VERTEX",
+                            "FRAGMENT",
+                            "COMPUTE"
+                        ],
+                        "description": "Maps to GHI_ShaderStage"
+                    }
+                }
+            }
+        },
+        "attachments": {
+            "type": "object",
+            "properties": {
+                "color": {
+                    "type": "array",
+                    "items": {
+                        "$ref": "#/definitions/GHI_Format"
+                    }
+                },
+                "depth": {
+                    "$ref": "#/definitions/GHI_Format"
+                }
+            }
+        },
+        "cullMode": {
+            "type": "string",
+            "enum": [
+                "NONE",
+                "BACK",
+                "FRONT"
+            ],
+            "default": "BACK"
+        },
+        "blendMode": {
+            "type": "string",
+            "enum": [
+                "OPAQUE",
+                "ALPHA",
+                "PREMULTIPLIED",
+                "ADDITIVE",
+                "MULTIPLY",
+                "MODULATE"
+            ],
+            "default": "OPAQUE"
+        },
+        "polygonMode": {
+            "type": "string",
+            "enum": [
+                "FILL",
+                "LINE",
+                "POINT"
+            ],
+            "default": "FILL"
+        },
+        "primitiveType": {
+            "type": "string",
+            "enum": [
+                "POINT_LIST",
+                "LINE_LIST",
+                "LINE_STRIP",
+                "TRIANGLE_LIST",
+                "TRIANGLE_STRIP"
+            ],
+            "default": "TRIANGLE_LIST"
+        }
+    },
+    "definitions": {
+        "GHI_Format": {
+            "type": "string",
+            "enum": [
+                "UNDEFINED",
+                "R8G8B8A8_UNORM",
+                "R8G8B8A8_SRGB",
+                "B8G8R8A8_SRGB",
+                "B8G8R8A8_UNORM",
+                "R32_UINT",
+                "R32_FLOAT",
+                "R32G32_FLOAT",
+                "R32G32B32_FLOAT",
+                "R32G32B32A32_FLOAT",
+                "D32_SFLOAT"
+            ]
+        }
+    }
+}
