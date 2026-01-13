@@ -1,153 +1,142 @@
 {
     "$schema": "http://json-schema.org/draft-07/schema#",
-    "title": "IAGHI Pipeline Definition",
+    "title": "IAGPU Pipeline Definition",
     "type": "object",
     "required": [
         "name",
-        "shaderSource",
-        "vertexShaderEntry",
-        "fragmentShaderEntry",
-        "attachments",
-        "primitiveType"
+        "shader",
+        "state"
     ],
-    "additionalProperties": true,
+    "additionalProperties": false,
     "properties": {
         "name": {
             "type": "string",
-            "description": "Unique name for the pipeline."
+            "description": "Unique identifier for the pipeline."
         },
-        "shaderSource": {
-            "type": "string",
-            "description": "Path to the .slang source file."
-        },
-        "vertexShaderEntry": {
-            "type": "string",
-            "default": "vertexMain"
-        },
-        "fragmentShaderEntry": {
-            "type": "string",
-            "default": "fragmentMain"
-        },
-        "bindings": {
-            "type": "array",
-            "items": {
-                "type": "object",
-                "required": [
-                    "binding",
-                    "type",
-                    "visibility"
-                ],
-                "properties": {
-                    "binding": {
-                        "type": [
-                            "string",
-                            "integer"
-                        ],
-                        "pattern": "^[0-9]+$",
-                        "description": "Binding index (UINT32)"
-                    },
-                    "count": {
-                        "type": [
-                            "string",
-                            "integer"
-                        ],
-                        "pattern": "^[0-9]+$",
-                        "default": 1,
-                        "description": "Array count (UINT32)"
-                    },
-                    "type": {
-                        "type": "string",
-                        "enum": [
-                            "UNIFORM_BUFFER",
-                            "STORAGE_BUFFER",
-                            "SAMPLED_IMAGE",
-                            "STORAGE_IMAGE"
-                        ]
-                    },
-                    "visibility": {
-                        "type": "string",
-                        "enum": [
-                            "VERTEX",
-                            "FRAGMENT",
-                            "COMPUTE"
-                        ],
-                        "description": "Maps to GHI_ShaderStage"
-                    }
+        "shader": {
+            "type": "object",
+            "required": [
+                "file"
+            ],
+            "properties": {
+                "file": {
+                    "type": "string",
+                    "description": "Path to the .slang source file."
+                },
+                "vertex": {
+                    "type": "string",
+                    "default": "vertexMain",
+                    "description": "Vertex shader entry point."
+                },
+                "fragment": {
+                    "type": "string",
+                    "default": "fragmentMain",
+                    "description": "Fragment shader entry point."
                 }
             }
         },
-        "attachments": {
+        "state": {
             "type": "object",
+            "description": "Fixed function state configuration.",
             "properties": {
-                "color": {
+                "colorFormats": {
                     "type": "array",
+                    "description": "List of color attachment formats (Max 7).",
+                    "maxItems": 7,
                     "items": {
-                        "$ref": "#/definitions/GHI_Format"
+                        "$ref": "#/definitions/Format"
                     }
                 },
-                "depth": {
-                    "$ref": "#/definitions/GHI_Format"
+                "depthFormat": {
+                    "description": "Depth stencil attachment format.",
+                    "$ref": "#/definitions/Format",
+                    "default": "UNDEFINED"
+                },
+                "cull": {
+                    "$ref": "#/definitions/CullMode",
+                    "default": "BACK"
+                },
+                "blend": {
+                    "$ref": "#/definitions/BlendMode",
+                    "default": "OPAQUE"
+                },
+                "topology": {
+                    "$ref": "#/definitions/PrimitiveType",
+                    "default": "TRIANGLE_LIST"
+                },
+                "polygonMode": {
+                    "$ref": "#/definitions/PolygonMode",
+                    "default": "FILL"
                 }
             }
         },
-        "cullMode": {
-            "type": "string",
-            "enum": [
-                "NONE",
-                "BACK",
-                "FRONT"
-            ],
-            "default": "BACK"
-        },
-        "blendMode": {
-            "type": "string",
-            "enum": [
-                "OPAQUE",
-                "ALPHA",
-                "PREMULTIPLIED",
-                "ADDITIVE",
-                "MULTIPLY",
-                "MODULATE"
-            ],
-            "default": "OPAQUE"
-        },
-        "polygonMode": {
-            "type": "string",
-            "enum": [
-                "FILL",
-                "LINE",
-                "POINT"
-            ],
-            "default": "FILL"
-        },
-        "primitiveType": {
-            "type": "string",
-            "enum": [
-                "POINT_LIST",
-                "LINE_LIST",
-                "LINE_STRIP",
-                "TRIANGLE_LIST",
-                "TRIANGLE_STRIP"
-            ],
-            "default": "TRIANGLE_LIST"
+        "vertexLayout": {
+            "type": "object",
+            "description": "Optional overrides for vertex input bindings and attributes.",
+            "properties": {
+                "buffers": {
+                    "type": "array",
+                    "items": {
+                        "type": "object",
+                        "required": ["binding"],
+                        "properties": {
+                            "binding": { "type": "integer", "minimum": 0 },
+                            "stride": { "type": "integer", "default": 0, "description": "0 = Auto-calculated" },
+                            "rate": { "$ref": "#/definitions/InputRate", "default": "VERTEX" }
+                        }
+                    }
+                },
+                "attributes": {
+                    "type": "array",
+                    "items": {
+                        "type": "object",
+                        "required": ["location", "binding"],
+                        "properties": {
+                            "location": { "type": "integer", "minimum": 0 },
+                            "binding": { "type": "integer", "minimum": 0 }
+                        }
+                    }
+                }
+            }
         }
     },
     "definitions": {
-        "GHI_Format": {
+        "Format": {
             "type": "string",
             "enum": [
                 "UNDEFINED",
-                "R8G8B8A8_UNORM",
-                "R8G8B8A8_SRGB",
-                "B8G8R8A8_SRGB",
-                "B8G8R8A8_UNORM",
-                "R32_UINT",
-                "R32_FLOAT",
-                "R32G32_FLOAT",
-                "R32G32B32_FLOAT",
-                "R32G32B32A32_FLOAT",
-                "D32_SFLOAT"
+                "R8G8B8A8_UNORM", "R8G8B8A8_SRGB",
+                "B8G8R8A8_SRGB", "B8G8R8A8_UNORM",
+                "R32_UINT", "R32_FLOAT",
+                "R32G32_FLOAT", "R32G32B32_FLOAT", "R32G32B32A32_FLOAT",
+                "D16_UNORM", "D16_UNORM_S8_UINT", "D24_UNORM_S8_UINT",
+                "D32_SFLOAT", "D32_SFLOAT_S8_UINT",
+                "BC1_RGB_UNORM_BLOCK", "BC1_RGB_SRGB_BLOCK",
+                "BC1_RGBA_UNORM_BLOCK", "BC1_RGBA_SRGB_BLOCK",
+                "BC2_UNORM_BLOCK", "BC2_SRGB_BLOCK",
+                "BC3_UNORM_BLOCK", "BC3_SRGB_BLOCK",
+                "BC5_UNORM_BLOCK", "BC5_SNORM_BLOCK"
             ]
+        },
+        "CullMode": {
+            "type": "string",
+            "enum": [ "NONE", "BACK", "FRONT" ]
+        },
+        "BlendMode": {
+            "type": "string",
+            "enum": [ "OPAQUE", "ALPHA", "PREMULTIPLIED", "ADDITIVE", "MULTIPLY", "MODULATE" ]
+        },
+        "PrimitiveType": {
+            "type": "string",
+            "enum": [ "POINT_LIST", "LINE_LIST", "LINE_STRIP", "TRIANGLE_LIST", "TRIANGLE_STRIP" ]
+        },
+        "PolygonMode": {
+            "type": "string",
+            "enum": [ "FILL", "LINE", "POINT" ]
+        },
+        "InputRate": {
+            "type": "string",
+            "enum": [ "VERTEX", "INSTANCE" ]
         }
     }
 }
