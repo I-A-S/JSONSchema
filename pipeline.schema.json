@@ -1,7 +1,6 @@
 {
   "$schema": "http://json-schema.org/draft-07/schema#",
-  "$id": "https://example.com/schemas/graphics-config.json",
-  "title": "Graphics Pipeline Configuration",
+  "title": "IAGPU Pipeline Configuration",
   "type": "object",
   "required": ["Version", "structs", "globals", "pipelines"],
   "properties": {
